@@ -1,0 +1,87 @@
+version: '3.1'
+
+services:
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.2.0
+    environment:
+      - discovery.type=single-node
+      - cluster.name=opamin-es
+      - node.name=es01
+      - http.port=9200
+      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=true
+      - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certs/ca.crt
+      - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certs/es01.crt
+      - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certs/es01.key
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.verification_mode=certificate
+      - xpack.security.transport.ssl.certificate_authorities=/usr/share/elasticsearch/config/certs/ca.crt
+      - xpack.security.transport.ssl.certificate=/usr/share/elasticsearch/config/certs/es01.crt
+      - xpack.security.transport.ssl.key=/usr/share/elasticsearch/config/certs/es01.key
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./data/es01:/usr/share/elasticsearch/data
+    secrets:
+      - source: ca.crt
+        target: /usr/share/elasticsearch/config/certs/ca.crt
+      - source: es01.crt
+        target: /usr/share/elasticsearch/config/certs/es01.crt
+      - source: es01.key
+        target: /usr/share/elasticsearch/config/certs/es01.key
+    ports:
+      - ${ES_PORT}:9200
+    healthcheck:
+      test: >
+        curl -s --cacert /run/secret/ca.crt https://localhost:9200 >/dev/null;
+        if [[ $$? == 52 ]]; then
+          echo 0;
+        else
+          echo 1;
+        fi
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  start:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - es01
+    command: es01:9200
+
+  create-certs:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.2.0
+    command: >
+      bash -c '
+        yum install -y -q -e 0 unzip;
+        if [[ ! -f /certs/bundle.zip ]]; then
+          bin/elasticsearch-certutil cert --silent --pem --in config/certs/instances.yml --out /certs/bundle.zip;
+          unzip /certs/bundle.zip -d /certs;
+          rm /certs/bundle.zip
+        fi;
+        chown -R 1000:0 /certs
+      '
+    user: '0'
+    working_dir: /usr/share/elasticsearch
+    volumes:
+      - ./.certs:/certs
+      - ./instances.yml:/usr/share/elasticsearch/config/certs/instances.yml
+
+  query:
+    build: containers/query
+    secrets:
+      - ca.crt
+      - elastic_password
+
+secrets:
+  ca.crt:
+    file: ./.certs/ca/ca.crt
+  es01.crt:
+    file: ./.certs/es01/es01.crt
+  es01.key:
+    file: ./.certs/es01/es01.key
+  elastic_password:
+    file: ./.passwords/elastic

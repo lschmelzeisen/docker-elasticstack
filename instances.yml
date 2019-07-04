@@ -1,0 +1,10 @@
+# Configuration for elasticsearch-certutil.
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/certutil.html
+
+instances:
+  - name: es01
+    dns:
+      - es01
+      - localhost
+    ip:
+      - 127.0.0.1
