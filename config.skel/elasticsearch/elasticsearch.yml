@@ -2,13 +2,17 @@ cluster.name: elasticstack-docker
 discovery.type: single-node
 network.host: 0.0.0.0
 http.port: 9200
-xpack.security.enabled: true
-xpack.security.http.ssl.enabled: true
-xpack.security.http.ssl.certificate_authorities: /usr/share/elasticsearch/config/certs/ca/ca.crt
-xpack.security.http.ssl.certificate: /usr/share/elasticsearch/config/certs/elasticsearch/elasticsearch.crt
-xpack.security.http.ssl.key: /usr/share/elasticsearch/config/certs/elasticsearch/elasticsearch.key
-xpack.security.transport.ssl.enabled: true
-xpack.security.transport.ssl.verification_mode: certificate
-xpack.security.transport.ssl.certificate_authorities: /usr/share/elasticsearch/config/certs/ca/ca.crt
-xpack.security.transport.ssl.certificate: /usr/share/elasticsearch/config/certs/elasticsearch/elasticsearch.crt
-xpack.security.transport.ssl.key: /usr/share/elasticsearch/config/certs/elasticsearch/elasticsearch.key
+bootstrap.memory_lock: true
+xpack.security:
+  enabled: true
+  http.ssl:
+    enabled: true
+    certificate_authorities: /usr/share/elasticsearch/config/certs/ca/ca.crt
+    certificate: /usr/share/elasticsearch/config/certs/elasticsearch/elasticsearch.crt
+    key: /usr/share/elasticsearch/config/certs/elasticsearch/elasticsearch.key
+  transport.ssl:
+    enabled: true
+    verification_mode: certificate
+    certificate_authorities: /usr/share/elasticsearch/config/certs/ca/ca.crt
+    certificate: /usr/share/elasticsearch/config/certs/elasticsearch/elasticsearch.crt
+    key: /usr/share/elasticsearch/config/certs/elasticsearch/elasticsearch.key
