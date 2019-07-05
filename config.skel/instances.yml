@@ -2,9 +2,9 @@
 # https://www.elastic.co/guide/en/elasticsearch/reference/current/certutil.html
 
 instances:
-  - name: es01
+  - name: elasticsearch
     dns:
-      - es01
+      - elasticsearch
       - localhost
     ip:
       - 127.0.0.1
