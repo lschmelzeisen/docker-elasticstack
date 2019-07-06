@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+set -euo pipefail
+
 ELASTIC_PASSWORD=$(cat /passwords/elastic)
 curl \
     --silent \

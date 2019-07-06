@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+set -euo pipefail
+
 cp -r config/. /kibana_config
 cp -r data/. /kibana_data
 cp -r /pwd/config.skel/kibana/. /kibana_config

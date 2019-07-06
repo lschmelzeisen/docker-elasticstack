@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+set -euo pipefail
+
 cp -r config/. /elasticsearch_config
 cp -r data/. /elasticsearch_data
 cp -r /pwd/config.skel/elasticsearch/. /elasticsearch_config/

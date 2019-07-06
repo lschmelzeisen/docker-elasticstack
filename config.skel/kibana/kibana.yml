@@ -3,7 +3,7 @@ elasticsearch:
   ssl.certificateAuthorities: /usr/share/kibana/config/certs/ca/ca.crt
   username: kibana
 server:
-  host: "0"
+  host: 0.0.0.0
   name: kibana
   ssl:
     enabled: true
