@@ -3,8 +3,6 @@ version: '3.6'
 services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.2.0
-    environment:
-      - node.name=elasticsearch
     volumes:
       - elasticsearch_config:/usr/share/elasticsearch/config
       - elasticsearch_data:/usr/share/elasticsearch/data
@@ -15,22 +13,41 @@ services:
       memlock: -1 # https://www.elastic.co/guide/en/elasticsearch/reference/7.2/setup-configuration-memory.html
       nofile: 65535 # https://www.elastic.co/guide/en/elasticsearch/reference/7.2/file-descriptors.html
 
-  start:
-    image: dadarek/wait-for-dependencies
-    depends_on:
-      - elasticsearch
-    command: elasticsearch:9200
-
-  setup:
-    build: containers/setup
-    environment:
-      - node.name=elasticsearch
+  setup_elasticsearch:
+    build: containers/setup_elasticsearch
     volumes:
       - elasticsearch_config:/elasticsearch_config
       - elasticsearch_data:/elasticsearch_data
       - certs:/certs
       - passwords:/passwords
       - ${PWD}:/pwd
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.2.0
+    depends_on:
+      - elasticsearch
+    volumes:
+      - kibana_config:/usr/share/kibana/config
+      - kibana_data:/usr/share/kibana/data
+      - certs:/usr/share/kibana/config/certs
+    ports:
+      - 5601:5601
+
+  setup_kibana:
+    build: containers/setup_kibana
+    volumes:
+      - kibana_config:/kibana_config
+      - kibana_data:/kibana_data
+      - certs:/certs
+      - passwords:/passwords
+      - ${PWD}:/pwd
+
+  start:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - elasticsearch
+      - kibana
+    command: elasticsearch:9200 kibana:5601
 
   curl:
     build: containers/curl
@@ -41,5 +58,7 @@ services:
 volumes:
   elasticsearch_config:
   elasticsearch_data:
+  kibana_config:
+  kibana_data:
   certs:
   passwords:

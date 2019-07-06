@@ -1,0 +1,13 @@
+elasticsearch:
+  hosts: https://elasticsearch:9200
+  ssl.certificateAuthorities: /usr/share/kibana/config/certs/ca/ca.crt
+  username: kibana
+server:
+  host: "0"
+  name: kibana
+  ssl:
+    enabled: true
+    certificateAuthorities: /usr/share/kibana/config/certs/ca/ca.crt
+    certificate: /usr/share/kibana/config/certs/kibana/kibana.crt
+    key: /usr/share/kibana/config/certs/kibana/kibana.key
+xpack.monitoring.ui.container.elasticsearch.enabled: true

@@ -4,15 +4,15 @@ cp -r config/. /elasticsearch_config
 cp -r data/. /elasticsearch_data
 cp -r /pwd/config.skel/elasticsearch/. /elasticsearch_config/
 
-echo "Auto-generating certificates..."
-bin/elasticsearch-certutil cert --silent --pem --in /pwd/config.skel/instances.yml --out /certs/bundle.zip
-unzip /certs/bundle.zip -d /certs/
-rm /certs/bundle.zip
-
 rm -r config data
 ln -s /elasticsearch_config config
 ln -s /elasticsearch_data data
 ln -s /certs config/certs
+
+echo "Auto-generating certificates..."
+bin/elasticsearch-certutil cert --silent --pem --in /pwd/config.skel/instances.yml --out /certs/bundle.zip
+unzip /certs/bundle.zip -d /certs/
+rm /certs/bundle.zip
 
 chown -R 1000 /elasticsearch_config
 chown -R 1000 /elasticsearch_data
