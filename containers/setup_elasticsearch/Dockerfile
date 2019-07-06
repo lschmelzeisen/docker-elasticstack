@@ -1,4 +1,5 @@
-FROM docker.elastic.co/elasticsearch/elasticsearch:7.2.0
+ARG tag
+FROM docker.elastic.co/elasticsearch/elasticsearch:${tag}
 
 RUN yum install -y unzip && \
     yum clean all

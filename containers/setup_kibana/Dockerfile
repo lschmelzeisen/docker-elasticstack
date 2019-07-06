@@ -1,4 +1,6 @@
-FROM docker.elastic.co/kibana/kibana:7.2.0
+ARG tag
+FROM docker.elastic.co/kibana/kibana:${tag}
+
 USER 0
 
 ADD entrypoint.sh /usr/local/bin/entrypoint.sh
