@@ -1,3 +1,4 @@
+csp.strict: true
 elasticsearch:
   hosts: https://elasticsearch:9200
   ssl.certificateAuthorities: /usr/share/kibana/config/certs/ca/ca.crt
