@@ -61,6 +61,12 @@ services:
       - certs:/certs
       - passwords:/passwords
 
+  volume_helper:
+    image: alpine
+    volumes:
+      - certs:/certs
+      - passwords:/passwords
+
 volumes:
   elasticsearch_config:
   elasticsearch_data:

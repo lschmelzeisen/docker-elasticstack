@@ -36,14 +36,6 @@ clean-kibana:
 	docker volume rm ${BASENAME}_kibana_config ${BASENAME}_kibana_data
 .PHONY: clean-kibana
 
-curl:
-	docker-compose run --rm -e METHOD=${METHOD} -e URL=${URL} -e JQ=${JQ} curl
-.PHONY: health
-
-health:
-	docker-compose run --rm -e METHOD=GET -e URL=_cat/health -e JQ=false curl
-.PHONY: health
-
 logs-elasticsearch:
 	docker-compose logs --no-color elasticsearch | tail -n +3 | cut -d"|" -f2- | jq ${LOGS}
 .PHONY: logs-elasticsearch
@@ -51,3 +43,38 @@ logs-elasticsearch:
 logs-kibana:
 	docker-compose logs --no-color kibana | tail -n +2 | cut -d"|" -f2- | jq ${LOGS}
 .PHONY: logs-elasticsearch
+
+ca-cert:
+	$(eval TEMPFILE := $(shell mktemp elasticstack.XXXXXXXXXX))
+	@docker-compose up --no-start volume_helper > /dev/null 2>&1
+	@docker cp $$(docker-compose ps -q volume_helper):/certs/ca/ca.crt ${TEMPFILE}
+	@cat ${TEMPFILE}
+	@docker-compose rm -f volume_helper > /dev/null 2>&1
+	@rm ${TEMPFILE}
+.PHONY: ca-cert
+
+password-elastic:
+	$(eval TEMPFILE := $(shell mktemp elasticstack.XXXXXXXXXX))
+	@docker-compose up --no-start volume_helper > /dev/null 2>&1
+	@docker cp $$(docker-compose ps -q volume_helper):/passwords/elastic ${TEMPFILE}
+	@cat ${TEMPFILE}
+	@docker-compose rm -f volume_helper > /dev/null 2>&1
+	@rm ${TEMPFILE}
+.PHONY: password-elasticsearch
+
+password-kibana:
+	$(eval TEMPFILE := $(shell mktemp elasticstack.XXXXXXXXXX))
+	@docker-compose up --no-start volume_helper > /dev/null 2>&1
+	@docker cp $$(docker-compose ps -q volume_helper):/passwords/kibana ${TEMPFILE}
+	@cat ${TEMPFILE}
+	@docker-compose rm -f volume_helper > /dev/null 2>&1
+	@rm ${TEMPFILE}
+.PHONY: password-elasticsearch
+
+curl:
+	docker-compose run --rm -e METHOD=${METHOD} -e URL=${URL} -e JQ=${JQ} curl
+.PHONY: health
+
+health:
+	docker-compose run --rm -e METHOD=GET -e URL=_cat/health -e JQ=false curl
+.PHONY: health
