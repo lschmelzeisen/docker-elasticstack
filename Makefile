@@ -5,8 +5,7 @@ METHOD=GET
 URL=''
 JQ=true
 
-# Arguments for 'make logs-*'
-LOGS='.message'
+# Arguments for 'make logs-*' LOGS='.message'
 
 start: .installed
 	docker-compose run --rm start
@@ -17,6 +16,7 @@ stop:
 .PHONY: stop
 
 .installed:
+	docker-compose pull
 	docker-compose run --rm setup_elasticsearch
 	docker-compose run --rm setup_kibana
 	touch .installed
@@ -37,11 +37,11 @@ clean-kibana:
 .PHONY: clean-kibana
 
 logs-elasticsearch:
-	docker-compose logs --no-color elasticsearch | tail -n +3 | cut -d"|" -f2- | jq ${LOGS}
+	@docker-compose logs --no-color elasticsearch | tail -n +3 | cut -d"|" -f2- | jq ${LOGS}
 .PHONY: logs-elasticsearch
 
 logs-kibana:
-	docker-compose logs --no-color kibana | tail -n +2 | cut -d"|" -f2- | jq ${LOGS}
+	@docker-compose logs --no-color kibana | tail -n +2 | cut -d"|" -f2- | jq ${LOGS}
 .PHONY: logs-elasticsearch
 
 ca-cert:
@@ -72,9 +72,9 @@ password-kibana:
 .PHONY: password-elasticsearch
 
 curl:
-	docker-compose run --rm -e METHOD=${METHOD} -e URL=${URL} -e JQ=${JQ} curl
+	@docker-compose run --rm -e METHOD=${METHOD} -e URL=${URL} -e JQ=${JQ} curl
 .PHONY: health
 
 health:
-	docker-compose run --rm -e METHOD=GET -e URL=_cat/health -e JQ=false curl
+	@docker-compose run --rm -e METHOD=GET -e URL=_cat/health -e JQ=false curl
 .PHONY: health

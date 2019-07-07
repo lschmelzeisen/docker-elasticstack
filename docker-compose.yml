@@ -14,16 +14,15 @@ services:
       nofile: 65535 # https://www.elastic.co/guide/en/elasticsearch/reference/7.2/file-descriptors.html
 
   setup_elasticsearch:
-    build:
-      context: containers/setup_elasticsearch
-      args:
-        tag: ${TAG}
+    image: docker.elastic.co/elasticsearch/elasticsearch:${TAG}
     volumes:
       - elasticsearch_config:/elasticsearch_config
       - elasticsearch_data:/elasticsearch_data
       - certs:/certs
       - passwords:/passwords
       - ${PWD}:/pwd
+      - ./scripts/setup_elasticsearch.sh:/usr/local/bin/setup_elasticsearch.sh
+    entrypoint: /usr/local/bin/setup_elasticsearch.sh
 
   kibana:
     image: docker.elastic.co/kibana/kibana:${TAG}
@@ -37,16 +36,16 @@ services:
       - ${KIBANA_PORT}:5601
 
   setup_kibana:
-    build:
-      context: containers/setup_kibana
-      args:
-        tag: ${TAG}
+    image: docker.elastic.co/kibana/kibana:${TAG}
     volumes:
       - kibana_config:/kibana_config
       - kibana_data:/kibana_data
       - certs:/certs
       - passwords:/passwords
       - ${PWD}:/pwd
+      - ./scripts/setup_kibana.sh:/usr/local/bin/setup_kibana.sh
+    entrypoint: /usr/local/bin/setup_kibana.sh
+    user: root
 
   start:
     image: dadarek/wait-for-dependencies
@@ -56,10 +55,12 @@ services:
     command: elasticsearch:9200 kibana:5601
 
   curl:
-    build: containers/curl
+    image: gempesaw/curl-jq
     volumes:
       - certs:/certs
       - passwords:/passwords
+      - ./scripts/curl.sh:/usr/local/bin/curl.sh
+    entrypoint: /usr/local/bin/curl.sh
 
   volume_helper:
     image: alpine

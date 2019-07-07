@@ -13,6 +13,7 @@ ln -s /certs config/certs
 
 echo "Auto-generating certificates..."
 bin/elasticsearch-certutil cert --silent --pem --in /pwd/config.skel/instances.yml --out /certs/bundle.zip
+yum install -y unzip
 unzip /certs/bundle.zip -d /certs/
 rm /certs/bundle.zip
 
