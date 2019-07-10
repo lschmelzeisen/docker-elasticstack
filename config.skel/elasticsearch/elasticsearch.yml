@@ -4,6 +4,9 @@ network.host: 0.0.0.0
 node.name: elasticsearch
 http.port: 9200
 bootstrap.memory_lock: true
+xpack.monitoring:
+  enabled: true
+  collection.enabled: true
 xpack.security:
   enabled: true
   http.ssl:

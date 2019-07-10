@@ -3,6 +3,7 @@ elasticsearch:
   hosts: https://elasticsearch:9200
   ssl.certificateAuthorities: /usr/share/kibana/config/certs/ca/ca.crt
   username: kibana
+  # password stored in kibana-keytore, see scripts/setup_kibana.sh
 server:
   host: 0.0.0.0
   name: kibana

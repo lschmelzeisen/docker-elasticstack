@@ -4,3 +4,4 @@
 instances:
   - name: elasticsearch
   - name: kibana
+  - name: logstash
