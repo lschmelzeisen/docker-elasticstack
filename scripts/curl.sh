@@ -7,7 +7,8 @@ curl \
     --silent \
     --show-error \
     --cacert /certs/ca/ca.crt \
-    --request ${METHOD} \
     --user elastic:${ELASTIC_PASSWORD} \
-    https://elasticsearch:9200/${URL} |
+    --request GET \
+    https://elasticsearch:9200/${URL} \
+    ${CURL_OPTS} |
     ([ ${JQ} != true ] && cat || jq)

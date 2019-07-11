@@ -1,8 +1,8 @@
 BASENAME=$(shell basename ${PWD})
 
 # Arguments for 'make curl'
-METHOD=GET
 URL=''
+CURL_OPTS=''
 JQ=true
 
 # Arguments for 'make logs-*'
@@ -81,9 +81,9 @@ password:
 .PHONY: password-elasticsearch
 
 curl:
-	@docker-compose run --rm -e METHOD=${METHOD} -e URL=${URL} -e JQ=${JQ} curl
+	@docker-compose run --rm -e URL=${URL} -e CURL_OPTS=${CURL_OPTS} -e JQ=${JQ} curl
 .PHONY: health
 
 health:
-	@docker-compose run --rm -e METHOD=GET -e URL=_cat/health -e JQ=false curl
+	@docker-compose run --rm -e URL=_cat/health -e CURL_OPTS='' -e JQ=false curl
 .PHONY: health
