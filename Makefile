@@ -78,11 +78,11 @@ password:
 	@cat ${TEMPFILE}
 	@docker-compose rm -f volume_helper > /dev/null 2>&1
 	@rm ${TEMPFILE}
-.PHONY: password-elasticsearch
+.PHONY: password
 
 curl:
 	@docker-compose run --rm -e URL=${URL} -e CURL_OPTS=${CURL_OPTS} -e JQ=${JQ} curl
-.PHONY: health
+.PHONY: curl
 
 health:
 	@docker-compose run --rm -e URL=_cat/health -e CURL_OPTS='' -e JQ=false curl
