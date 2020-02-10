@@ -1,0 +1,22 @@
+cluster.name: docker-elasticstack
+discovery.type: single-node
+network.host: 0.0.0.0
+node.name: elasticsearch
+http.port: 9200
+bootstrap.memory_lock: true
+xpack:
+  monitoring:
+    enabled: true
+    collection.enabled: true
+  security:
+    enabled: true
+    http.ssl:
+      enabled: true
+      certificate_authorities: /usr/share/elasticsearch/config/certs/ca/ca.crt
+      certificate: /usr/share/elasticsearch/config/certs/elasticsearch/elasticsearch.crt
+      key: /usr/share/elasticsearch/config/certs/elasticsearch/elasticsearch.key
+    transport.ssl:
+      enabled: true
+      certificate_authorities: /usr/share/elasticsearch/config/certs/ca/ca.crt
+      certificate: /usr/share/elasticsearch/config/certs/elasticsearch/elasticsearch.crt
+      key: /usr/share/elasticsearch/config/certs/elasticsearch/elasticsearch.key

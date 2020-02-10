@@ -4,78 +4,22 @@ services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:${TAG}
     volumes:
-      - elasticsearch_config:/usr/share/elasticsearch/config
-      - elasticsearch_data:/usr/share/elasticsearch/data
-      - certs:/usr/share/elasticsearch/config/certs
+      - ${STACK_DIR}/config-elasticsearch:/usr/share/elasticsearch/config
+      - ${STACK_DIR}/data-elasticsearch:/usr/share/elasticsearch/data
+      - ${STACK_DIR}/certs:/usr/share/elasticsearch/config/certs
     ports:
       - ${ELASTICSEARCH_PORT}:9200
     ulimits:
       memlock: -1 # https://www.elastic.co/guide/en/elasticsearch/reference/7.2/setup-configuration-memory.html
       nofile: 65535 # https://www.elastic.co/guide/en/elasticsearch/reference/7.2/file-descriptors.html
 
-  setup_elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:${TAG}
-    volumes:
-      - elasticsearch_config:/elasticsearch_config
-      - elasticsearch_data:/elasticsearch_data
-      - certs:/certs
-      - passwords:/passwords
-      - ${PWD}:/pwd
-      - ./scripts/setup_elasticsearch.sh:/usr/local/bin/setup_elasticsearch.sh
-    entrypoint: /usr/local/bin/setup_elasticsearch.sh
-
   kibana:
     image: docker.elastic.co/kibana/kibana:${TAG}
     depends_on:
       - elasticsearch
     volumes:
-      - kibana_config:/usr/share/kibana/config
-      - kibana_data:/usr/share/kibana/data
-      - certs:/usr/share/kibana/config/certs
+      - ${STACK_DIR}/config-kibana:/usr/share/kibana/config
+      - ${STACK_DIR}/data-kibana:/usr/share/kibana/data
+      - ${STACK_DIR}/certs:/usr/share/kibana/config/certs
     ports:
       - ${KIBANA_PORT}:5601
-
-  setup_kibana:
-    image: docker.elastic.co/kibana/kibana:${TAG}
-    volumes:
-      - kibana_config:/kibana_config
-      - kibana_data:/kibana_data
-      - certs:/certs
-      - passwords:/passwords
-      - ${PWD}:/pwd
-      - ./scripts/setup_kibana.sh:/usr/local/bin/setup_kibana.sh
-    entrypoint: /usr/local/bin/setup_kibana.sh
-    user: root
-
-  start:
-    image: dadarek/wait-for-dependencies
-    depends_on:
-      - elasticsearch
-      - kibana
-    command: elasticsearch:9200 kibana:5601
-
-  curl:
-    image: gempesaw/curl-jq
-    volumes:
-      - certs:/certs
-      - passwords:/passwords
-      - ./scripts/curl.sh:/usr/local/bin/curl.sh
-    entrypoint: /usr/local/bin/curl.sh
-
-  volume_helper:
-    image: alpine
-    volumes:
-      - elasticsearch_config:/elasticsearch_config
-      - elasticsearch_data:/elasticsearch_data
-      - kibana_config:/kibana_config
-      - kibana_data:/kibana_data
-      - certs:/certs
-      - passwords:/passwords
-
-volumes:
-  elasticsearch_config:
-  elasticsearch_data:
-  kibana_config:
-  kibana_data:
-  certs:
-  passwords:

@@ -1,79 +1,100 @@
-BASENAME=$(shell basename ${PWD})
+include .env
 
-# Arguments for 'make curl'
-URL=''
-CURL_OPTS=''
-JQ=true
+PROJECT_NAME=$(shell basename ${PWD})
 
-# Arguments for 'make logs-*'
-LOGS='.message'
+# Arguments for "make curl"
+URL=""
+CURL_OPTS=""
 
-# Arguments for 'make password'
-USER='elastic'
+# Arguments for "make logs-*"
+LOGS=".message"
 
-start: .installed
-	docker-compose run --rm start
-.PHONY: start
+# ------------------------------------------------------------------------------
 
-stop:
-	docker-compose stop
-.PHONY: stop
+# See: https://blog.thapaliya.com/posts/well-documented-makefiles/
+help: ##- Show this help message.
+	@awk 'BEGIN {FS = ":.*#{2}-"; printf "usage: make \033[36m<target>\033[0m\n\nTargets:\n"} /^[a-zA-Z_-]+:.*?#{2}-/ { printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
+.PHONY: help
 
-.installed:
-	docker-compose pull
-	docker-compose run --rm setup_elasticsearch
-	docker-compose run --rm setup_kibana
-	touch .installed
+# ------------------------------------------------------------------------------
 
-clean:
-	docker-compose down -v
-	rm -f .installed
-.PHONY: clean
+start: .setup ##- Start the cluster (perform any setup if necessary).
+	docker-compose up -d
+.PHONY: up
 
-clean-elasticsearch:
-	docker-compose rm -sf elasticsearch
-	docker volume rm -f ${BASENAME}_elasticsearch_config ${BASENAME}_elasticsearch_data
-.PHONY: clean-elasticsearch
+stop: ##- Stop the cluster.
+	docker-compose down
+.PHONY: down
 
-clean-kibana:
-	docker-compose rm -sf kibana
-	docker volume rm -f ${BASENAME}_kibana_config ${BASENAME}_kibana_data
-.PHONY: clean-kibana
+clean: stop ##- Remove all created files.
+	rm -rf ${STACK_DIR} .setup
+.PHONY: clean-new
 
-logs-elasticsearch:
+# ------------------------------------------------------------------------------
+
+# Sometimes, when you get Elasticsearch has problems starting, it will fail to
+# populate the logs with correct JSON-format. In those cases you can manually
+# check the complete logs via `docker-compose logs elasticsearch`.
+
+logs-elasticsearch: ##- Print message of JSON-logs of Elasticsearch.
 	@docker-compose logs --no-color elasticsearch | tail -n +3 | sed "s/^[^|]* | //g" | jq ${LOGS}
 .PHONY: logs-elasticsearch
 
-logs-kibana:
+logs-kibana: ##- Print message of JSON-logs of Kibana.
 	@docker-compose logs --no-color kibana | tail -n +2 | sed "s/^[^|]* | //g" | jq ${LOGS}
-.PHONY: logs-elasticsearch
+.PHONY: logs-kibana
 
-volume-helper:
-	@docker-compose run --rm volume_helper
-.PHONY: volume-helper
+# ------------------------------------------------------------------------------
 
-ca-cert:
-	$(eval TEMPFILE := $(shell mktemp elasticstack.XXXXXXXXXX))
-	@docker-compose up --no-start volume_helper > /dev/null 2>&1
-	@docker cp $$(docker-compose ps -q volume_helper):/certs/ca/ca.crt ${TEMPFILE}
-	@cat ${TEMPFILE}
-	@docker-compose rm -f volume_helper > /dev/null 2>&1
-	@rm ${TEMPFILE}
-.PHONY: ca-cert
+health: ##- Check health status of cluster.
+	@docker-compose -f docker-compose.helpers.yml run --rm -e URL="_cat/health" -e CURL_OPTS="" curl
+.PHONY: health
 
-password:
-	$(eval TEMPFILE := $(shell mktemp elasticstack.XXXXXXXXXX))
-	@docker-compose up --no-start volume_helper > /dev/null 2>&1
-	@docker cp $$(docker-compose ps -q volume_helper):/passwords/${USER} ${TEMPFILE}
-	@cat ${TEMPFILE}
-	@docker-compose rm -f volume_helper > /dev/null 2>&1
-	@rm ${TEMPFILE}
-.PHONY: password
-
-curl:
-	@docker-compose run --rm -e URL=${URL} -e CURL_OPTS=${CURL_OPTS} -e JQ=${JQ} curl
+curl: ##- Send curl-requests to SSL-secured cluster.
+	@docker-compose -f docker-compose.helpers.yml run --rm -e URL=${URL} -e CURL_OPTS=${CURL_OPTS} curl
 .PHONY: curl
 
-health:
-	@docker-compose run --rm -e URL=_cat/health -e CURL_OPTS='' -e JQ=false curl
-.PHONY: health
+# ------------------------------------------------------------------------------
+
+# Used to setup certs and passwords.
+
+.setup:
+	make setup-elasticsearch setup-kibana
+	touch .setup
+
+setup-elasticsearch: ${STACK_DIR}
+	docker-compose -f docker-compose.helpers.yml run --rm setup-elasticsearch
+.PHONY: setup-elasticsearch
+
+setup-kibana: ${STACK_DIR}
+	docker-compose -f docker-compose.helpers.yml run --rm setup-kibana
+.PHONY: setup-kibana
+
+${STACK_DIR}:
+	mkdir ${STACK_DIR}
+	mkdir ${STACK_DIR}/certs
+	mkdir ${STACK_DIR}/passwords
+
+	cp -r ./config-elasticsearch ${STACK_DIR}/config-elasticsearch
+	mkdir ${STACK_DIR}/data-elasticsearch
+
+	cp -r ./config-kibana ${STACK_DIR}/config-kibana
+	mkdir ${STACK_DIR}/data-kibana
+
+# ------------------------------------------------------------------------------
+
+# Reset config-* directories to Elasticsearch/Kibana defaults. These are only
+# helpers for the development of this repo. As a user you should ignore them.
+
+config: config-elasticsearch config-kibana
+.PHONY: config
+
+config-elasticsearch:
+	docker create --name ${PROJECT_NAME}_elasticsearch-config docker.elastic.co/elasticsearch/elasticsearch:${TAG}
+	docker cp ${PROJECT_NAME}_elasticsearch-config:/usr/share/elasticsearch/config ./config-elasticsearch
+	docker rm -f ${PROJECT_NAME}_elasticsearch-config
+
+config-kibana:
+	docker create --name ${PROJECT_NAME}_kibana-config docker.elastic.co/kibana/kibana:${TAG}
+	docker cp ${PROJECT_NAME}_kibana-config:/usr/share/kibana/config/. ./config-kibana
+	docker rm -f ${PROJECT_NAME}_kibana-config

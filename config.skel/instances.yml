@@ -1,6 +1,0 @@
-# Configuration for elasticsearch-certutil.
-# https://www.elastic.co/guide/en/elasticsearch/reference/current/certutil.html
-
-instances:
-  - name: elasticsearch
-  - name: kibana
