@@ -47,40 +47,12 @@ services:
     entrypoint: /usr/local/bin/setup_kibana.sh
     user: root
 
-  logstash:
-    image: docker.elastic.co/logstash/logstash:${TAG}
-    depends_on:
-      - elasticsearch
-    volumes:
-      - logstash_config:/usr/share/logstash/config
-      - logstash_data:/usr/share/logstash/data
-      - logstash_pipeline:/usr/share/logstash/pipeline
-      - certs:/usr/share/logstash/config/certs
-    ports:
-      - 5000:5000
-      - 5400:5400
-      - ${LOGSTASH_PORT}:9600
-
-  setup_logstash:
-    image: docker.elastic.co/logstash/logstash:${TAG}
-    volumes:
-      - logstash_config:/logstash_config
-      - logstash_data:/logstash_data
-      - logstash_pipeline:/logstash_pipeline
-      - certs:/certs
-      - passwords:/passwords
-      - ${PWD}:/pwd
-      - ./scripts/setup_logstash.sh:/usr/local/bin/setup_logstash.sh
-    entrypoint: /usr/local/bin/setup_logstash.sh
-    user: root
-
   start:
     image: dadarek/wait-for-dependencies
     depends_on:
       - elasticsearch
       - kibana
-      - logstash
-    command: elasticsearch:9200 kibana:5601 logstash:9600
+    command: elasticsearch:9200 kibana:5601
 
   curl:
     image: gempesaw/curl-jq
@@ -97,9 +69,6 @@ services:
       - elasticsearch_data:/elasticsearch_data
       - kibana_config:/kibana_config
       - kibana_data:/kibana_data
-      - logstash_config:/logstash_config
-      - logstash_data:/logstash_data
-      - logstash_pipeline:/logstash pipeline
       - certs:/certs
       - passwords:/passwords
 
@@ -108,8 +77,5 @@ volumes:
   elasticsearch_data:
   kibana_config:
   kibana_data:
-  logstash_config:
-  logstash_data:
-  logstash_pipeline:
   certs:
   passwords:

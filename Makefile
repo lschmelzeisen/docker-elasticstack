@@ -23,7 +23,6 @@ stop:
 	docker-compose pull
 	docker-compose run --rm setup_elasticsearch
 	docker-compose run --rm setup_kibana
-	docker-compose run --rm setup_logstash
 	touch .installed
 
 clean:
@@ -41,11 +40,6 @@ clean-kibana:
 	docker volume rm -f ${BASENAME}_kibana_config ${BASENAME}_kibana_data
 .PHONY: clean-kibana
 
-clean-logstash:
-	docker-compose rm -sf logstash
-	docker volume rm -f ${BASENAME}_logstash_config ${BASENAME}_logstash_data ${BASENAME}_logstash_pipeline
-.PHONY: clean-logstash
-
 logs-elasticsearch:
 	@docker-compose logs --no-color elasticsearch | tail -n +3 | sed "s/^[^|]* | //g" | jq ${LOGS}
 .PHONY: logs-elasticsearch
@@ -53,10 +47,6 @@ logs-elasticsearch:
 logs-kibana:
 	@docker-compose logs --no-color kibana | tail -n +2 | sed "s/^[^|]* | //g" | jq ${LOGS}
 .PHONY: logs-elasticsearch
-
-logs-logstash:
-	@docker-compose logs --no-color logstash | tail -n +2 | sed "s/^[^|]* | //g"
-.PHONY: logs-logstash
 
 volume-helper:
 	@docker-compose run --rm volume_helper
