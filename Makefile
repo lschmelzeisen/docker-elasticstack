@@ -13,7 +13,7 @@ LOGS=".message"
 
 # See: https://blog.thapaliya.com/posts/well-documented-makefiles/
 help: ##- Show this help message.
-	@awk 'BEGIN {FS = ":.*#{2}-"; printf "usage: make \033[36m<target>\033[0m\n\nTargets:\n"} /^[a-zA-Z_-]+:.*?#{2}-/ { printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*#{2}-"; printf "usage: make \033[36m<target>\033[0m\n\nTargets:\n"} /^[a-zA-Z0-9_-]+:.*?#{2}-/ { printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 .PHONY: help
 
 # ------------------------------------------------------------------------------
@@ -76,6 +76,7 @@ ${STACK_DIR}:
 	mkdir ${STACK_DIR}/passwords
 
 	cp -r ./config-elasticsearch ${STACK_DIR}/config-elasticsearch
+	mkdir ${STACK_DIR}/logs-elasticsearch
 	mkdir ${STACK_DIR}/data-elasticsearch
 
 	cp -r ./config-kibana ${STACK_DIR}/config-kibana
