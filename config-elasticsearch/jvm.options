@@ -19,8 +19,8 @@
 # Xms represents the initial size of total heap space
 # Xmx represents the maximum size of total heap space
 
--Xms1g
--Xmx4g
+-Xms2g
+-Xmx2g
 
 ################################################################
 ## Expert settings
@@ -74,3 +74,11 @@
 
 # JDK 9+ GC logging
 9-:-Xlog:gc*,gc+age=trace,safepoint:file=logs/gc.log:utctime,pid,tags:filecount=32,filesize=64m
+
+################################################################
+## Custom settings
+################################################################
+
+# Run bootstrap checks even though we are in single node mode.
+# See: https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html#_forcing_the_bootstrap_checks
+-Des.enforce.bootstrap.checks=true

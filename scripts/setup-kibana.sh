@@ -9,6 +9,7 @@ echo
 echo "-------------------------------------------------------------------------------"
 echo "Storing kibana password..."
 echo "-------------------------------------------------------------------------------"
+# See: https://www.elastic.co/guide/en/elasticsearch/reference/current/get-started-kibana-user.html
 su kibana <<SU
 bin/kibana-keystore create
 bin/kibana-keystore add "elasticsearch.password" -x < /passwords/kibana

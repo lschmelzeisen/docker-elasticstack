@@ -5,13 +5,15 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:${TAG}
     volumes:
       - ${STACK_DIR}/config-elasticsearch:/usr/share/elasticsearch/config
-      - ${STACK_DIR}/data-elasticsearch:/usr/share/elasticsearch/data
+      - ${STACK_DIR}/logs-elasticsearch:/var/log/elasticsearch
+      - ${STACK_DIR}/data-elasticsearch:/var/data/elasticsearch
       - ${STACK_DIR}/certs:/usr/share/elasticsearch/config/certs
     ports:
       - ${ELASTICSEARCH_PORT}:9200
     ulimits:
-      memlock: -1 # https://www.elastic.co/guide/en/elasticsearch/reference/7.2/setup-configuration-memory.html
-      nofile: 65535 # https://www.elastic.co/guide/en/elasticsearch/reference/7.2/file-descriptors.html
+      memlock: -1 # https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-configuration-memory.html
+      nofile: 65535 # https://www.elastic.co/guide/en/elasticsearch/reference/current/file-descriptors.html
+      nproc: 4096 # https://www.elastic.co/guide/en/elasticsearch/reference/current/max-number-of-threads.html
 
   kibana:
     image: docker.elastic.co/kibana/kibana:${TAG}

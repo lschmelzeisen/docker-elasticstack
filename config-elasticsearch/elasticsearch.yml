@@ -1,13 +1,33 @@
 cluster.name: docker-elasticstack
-discovery.type: single-node
-network.host: 0.0.0.0
 node.name: elasticsearch
 http.port: 9200
+discovery.type: single-node
+
+# Bind to 0.0.0.0 so that the node is visible outside the docker container.
+network.host: 0.0.0.0
+
+# Single-node cluster, dont need transport layer to be visible from the outside.
+transport.host: _local_
+
+# Lock process address space into RAM, preventing swapping.
+# See: https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-configuration-memory.html
 bootstrap.memory_lock: true
+
+# Don't have data and logs inside of $ES_HOME.
+# See: https://www.elastic.co/guide/en/elasticsearch/reference/current/path-settings.html
+path:
+  logs: /var/log/elasticsearch # Seems to be unused when started via Docker.
+  data: /var/data/elasticsearch
+
 xpack:
+  # Enable cluster monitoring. Not sure how it works or what it does.
+  # See: https://www.elastic.co/guide/en/elasticsearch/reference/current/monitoring-settings.html
   monitoring:
     enabled: true
     collection.enabled: true
+
+  # Encypt communications with SSL, require correct certificate to access cluster.
+  # See: https://www.elastic.co/guide/en/elasticsearch/reference/current/configuring-tls.html
   security:
     enabled: true
     http.ssl:
@@ -20,3 +40,7 @@ xpack:
       certificate_authorities: /usr/share/elasticsearch/config/certs/ca/ca.crt
       certificate: /usr/share/elasticsearch/config/certs/elasticsearch/elasticsearch.crt
       key: /usr/share/elasticsearch/config/certs/elasticsearch/elasticsearch.key
+
+    # Disable document and field level security, as it's rarely needed.
+    # See: https://www.elastic.co/guide/en/elasticsearch/reference/current/field-and-document-access-control.html
+    dls_fls.enabled: false
