@@ -10,7 +10,7 @@ Setup of [Elasticsearch](https://www.elastic.co/elasticsearch) and
 At least to the degree that this is possible.
 
 Of course the above comes with with a huge caveat: running only a single node
-means no redudancy and no data replication.
+means no load balancing, no redudancy and no data replication.
 Thus you should only use this if in your use case hardware/software failures are
 not critical; that is where downtime and data loss is tolerable.
 

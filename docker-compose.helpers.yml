@@ -21,7 +21,7 @@ services:
     image: docker.elastic.co/kibana/kibana:${TAG}
     volumes:
       - ${STACK_DIR}/config-kibana:/usr/share/kibana/config
-      - ${STACK_DIR}/data-kibana:/usr/share/kibana/data
+      - ${STACK_DIR}/data-kibana:/var/data/kibana
       - ${STACK_DIR}/certs:/usr/share/kibana/config/kibana
       - ${STACK_DIR}/passwords:/passwords
       - ./scripts/setup-kibana.sh:/usr/local/bin/setup-kibana.sh

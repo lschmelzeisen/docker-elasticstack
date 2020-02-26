@@ -1,15 +1,47 @@
+# Enforce content security policy (don't load unsafe scripts, breaks old browsers).
+# See: https://www.elastic.co/guide/en/kibana/current/production.html#csp-strict-mode
 csp.strict: true
+
 elasticsearch:
+  # Elasticsearch node to connect to.
   hosts: [ "https://elasticsearch:9200" ]
+
+  # Trusted CA cert of Elasticsearch.
+  # See: https://www.elastic.co/guide/en/kibana/current/configuring-tls.html#configuring-tls-kib-es
   ssl.certificateAuthorities: /usr/share/kibana/config/certs/ca/ca.crt
+
+  # Authentification
   username: kibana
   # password stored in kibana-keytore, see scripts/setup-kibana.sh
+
+# Don't have data inside of $KIBANA_HOME.
+path.data: /var/data/kibana
+
 server:
+  # Bind to 0.0.0.0 so that Kibana is visible outside the docker container.
   host: 0.0.0.0
+
+  # Display-name that identifies this Kibana instance.
   name: kibana
+
+  # Encrypt traffic between the browser and Kibana.
+  # See: https://www.elastic.co/guide/en/kibana/current/configuring-tls.html#configuring-tls-browser-kib
   ssl:
     enabled: true
     certificateAuthorities: /usr/share/kibana/config/certs/ca/ca.crt
     certificate: /usr/share/kibana/config/certs/kibana/kibana.crt
     key: /usr/share/kibana/config/certs/kibana/kibana.key
-xpack.monitoring.ui.container.elasticsearch.enabled: true
+
+# Disable sending telemetry data to Elasticsearch.
+telemetry.enabled: false
+
+xpack:
+  # Enable monitoring of Cgroup statistics because we are using containers.
+  # See: https://www.elastic.co/guide/en/kibana/current/monitoring-settings-kb.html#monitoring-ui-cgroup-settings
+  monitoring.ui.container:
+    elasticsearch.enabled: true
+    logstash.enabled: true
+
+  # Enable audit logging.
+  # See: https://www.elastic.co/guide/en/kibana/current/xpack-security-audit-logging.html
+  security.audit.enabled: true

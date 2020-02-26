@@ -21,7 +21,7 @@ services:
       - elasticsearch
     volumes:
       - ${STACK_DIR}/config-kibana:/usr/share/kibana/config
-      - ${STACK_DIR}/data-kibana:/usr/share/kibana/data
+      - ${STACK_DIR}/data-kibana:/var/data/kibana
       - ${STACK_DIR}/certs:/usr/share/kibana/config/certs
     ports:
       - ${KIBANA_PORT}:5601
