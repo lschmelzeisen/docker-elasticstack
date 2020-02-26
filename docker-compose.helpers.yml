@@ -27,11 +27,3 @@ services:
       - ./scripts/setup-kibana.sh:/usr/local/bin/setup-kibana.sh
     entrypoint: /usr/local/bin/setup-kibana.sh
     user: root
-
-  curl:
-    image: gempesaw/curl-jq
-    volumes:
-      - ${STACK_DIR}/certs:/certs
-      - ${STACK_DIR}/passwords:/passwords
-      - ./scripts/curl.sh:/usr/local/bin/curl.sh
-    entrypoint: /usr/local/bin/curl.sh

@@ -4,10 +4,6 @@ PROJECT_NAME=$(shell basename ${PWD})
 
 # Arguments for "make curl"
 URL=""
-CURL_OPTS=""
-
-# Arguments for "make logs-*"
-LOGS=".message"
 
 # ------------------------------------------------------------------------------
 
@@ -26,7 +22,7 @@ stop: ##- Stop the cluster.
 	docker-compose down
 .PHONY: down
 
-clean: stop ##- Remove all created files.
+clean: stop ##- Remove all created files (this deletes all your data!).
 	rm -rf ${STACK_DIR} .setup
 .PHONY: clean-new
 
@@ -37,21 +33,27 @@ clean: stop ##- Remove all created files.
 # check the complete logs via `docker-compose logs elasticsearch`.
 
 logs-elasticsearch: ##- Print message of JSON-logs of Elasticsearch.
-	@docker-compose logs --no-color elasticsearch | tail -n +3 | sed "s/^[^|]* | //g" | jq ${LOGS}
+	@docker-compose logs --no-color elasticsearch | tail -n +3 | awk 'sub("^[^\\|]* \\| ", "")' | jq -M ".timestamp + \" | \" + .level + \" | \" + .message" | awk 'gsub("\"", "")'
 .PHONY: logs-elasticsearch
 
 logs-kibana: ##- Print message of JSON-logs of Kibana.
-	@docker-compose logs --no-color kibana | tail -n +2 | sed "s/^[^|]* | //g" | jq ${LOGS}
+	@docker-compose logs --no-color kibana | tail -n +3 | awk 'sub("^[^\\|]* \\| ", "")' | jq -M ".[\"@timestamp\"] + \" | \" + .message" | awk 'gsub("\"", "")'
 .PHONY: logs-kibana
 
 # ------------------------------------------------------------------------------
 
 health: ##- Check health status of cluster.
-	@docker-compose -f docker-compose.helpers.yml run --rm -e URL="_cat/health" -e CURL_OPTS="" curl
+	@make --silent curl URL="_cat/health"
 .PHONY: health
 
-curl: ##- Send curl-requests to SSL-secured cluster.
-	@docker-compose -f docker-compose.helpers.yml run --rm -e URL=${URL} -e CURL_OPTS=${CURL_OPTS} curl
+curl: ##- Send TLS-encrypted curl-requests cluster.
+	@curl \
+		--silent \
+		--show-error \
+		--cacert "${STACK_DIR}/certs/ca/ca.crt" \
+		--user elastic:`cat "${STACK_DIR}/passwords/elastic"` \
+		--request GET \
+		"https://localhost:${ELASTICSEARCH_PORT}/${URL}"
 .PHONY: curl
 
 # ------------------------------------------------------------------------------
