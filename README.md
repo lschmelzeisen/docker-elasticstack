@@ -165,6 +165,11 @@ Targets:
   Specifically, the certificate of the certificate authority (CA) is stored in
   `${STACK_DIR}/certs/ca/ca.crt`.
 
+* **How can I connect to the cluster from Python via [elasticsearch-py](https://elasticsearch-py.readthedocs.io/)?**
+
+  An example Python script can be found in
+  [samples/python-connect/](samples/python-connect/).
+
 * **How can I debug problems with the cluster?**
 
   Elasticsearch and Kibana log message are available via `docker-compose logs
