@@ -23,7 +23,7 @@ stop: ##- Stop the cluster.
 .PHONY: down
 
 clean: stop ##- Remove all created files (this deletes all your data!).
-	rm -rf ${STACK_DIR} .setup
+	rm -rf ${STACK_DIR}/* .setup
 .PHONY: clean-new
 
 # ------------------------------------------------------------------------------
@@ -61,28 +61,21 @@ curl: ##- Send TLS-encrypted curl-requests cluster.
 # Used to setup certs and passwords.
 
 .setup:
+	mkdir -p ${STACK_DIR}/certs ${STACK_DIR}/passwords
+	mkdir -p ${STACK_DIR}/config-elasticsearch ${STACK_DIR}/logs-elasticsearch ${STACK_DIR}/data-elasticsearch
+	cp -r ./config-elasticsearch/* ${STACK_DIR}/config-elasticsearch
+	mkdir -p ${STACK_DIR}/config-kibana ${STACK_DIR}/data-kibana
+	cp -r ./config-kibana/* ${STACK_DIR}/config-kibana
 	make setup-elasticsearch setup-kibana
 	touch .setup
 
-setup-elasticsearch: ${STACK_DIR}
+setup-elasticsearch:
 	docker-compose -f docker-compose.helpers.yml run --rm setup-elasticsearch
 .PHONY: setup-elasticsearch
 
-setup-kibana: ${STACK_DIR}
+setup-kibana:
 	docker-compose -f docker-compose.helpers.yml run --rm setup-kibana
 .PHONY: setup-kibana
-
-${STACK_DIR}:
-	mkdir ${STACK_DIR}
-	mkdir ${STACK_DIR}/certs
-	mkdir ${STACK_DIR}/passwords
-
-	cp -r ./config-elasticsearch ${STACK_DIR}/config-elasticsearch
-	mkdir ${STACK_DIR}/logs-elasticsearch
-	mkdir ${STACK_DIR}/data-elasticsearch
-
-	cp -r ./config-kibana ${STACK_DIR}/config-kibana
-	mkdir ${STACK_DIR}/data-kibana
 
 # ------------------------------------------------------------------------------
 
