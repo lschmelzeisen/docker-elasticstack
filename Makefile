@@ -33,11 +33,12 @@ clean: stop ##- Remove all created files (this deletes all your data!).
 # check the complete logs via `docker-compose logs elasticsearch`.
 
 logs-elasticsearch: ##- Print message of JSON-logs of Elasticsearch.
-	@docker-compose logs --no-color elasticsearch | tail -n +3 | awk 'sub("^[^\\|]* \\| ", "")' | jq -M ".timestamp + \" | \" + .level + \" | \" + .message" | awk 'gsub("\"", "")'
+	@docker-compose logs --no-color elasticsearch | tail -n +5 | awk 'sub("^[^\\|]* \\| ", "")' | jq -M '"\(.timestamp) | \(.level) | \(.message)"' | awk 'gsub("\"", "")'
 .PHONY: logs-elasticsearch
+#@docker-compose logs --no-color elasticsearch | tail -n +5 | awk 'sub("^[^\\|]* \\| ", "")' | jq -M ".timestamp + \" | \" + .level + \" | \" + .message" | awk 'gsub("\"", "")'
 
 logs-kibana: ##- Print message of JSON-logs of Kibana.
-	@docker-compose logs --no-color kibana | tail -n +3 | awk 'sub("^[^\\|]* \\| ", "")' | jq -M ".[\"@timestamp\"] + \" | \" + .message" | awk 'gsub("\"", "")'
+	@docker-compose logs --no-color kibana | tail -n +1 | awk 'sub("^[^\\|]* \\| ", "")' | jq -M '"\(.["@timestamp"]) | \((.tags[0] // "NULL") | ascii_upcase) | \(.message)"' | awk 'gsub("\"", "")'
 .PHONY: logs-kibana
 
 # ------------------------------------------------------------------------------
