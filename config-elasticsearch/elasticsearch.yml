@@ -23,7 +23,6 @@ xpack:
   # Enable cluster monitoring. Not sure how it works or what it does.
   # See: https://www.elastic.co/guide/en/elasticsearch/reference/current/monitoring-settings.html
   monitoring:
-    enabled: true
     collection.enabled: true
 
   # Encypt communications with SSL, require correct certificate to access cluster.
