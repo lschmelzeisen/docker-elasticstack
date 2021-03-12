@@ -1,7 +1,7 @@
 # docker-elasticstack
 
-Setup of [Elasticsearch](https://www.elastic.co/elasticsearch) and
-[Kibana](https://www.elastic.co/kibana) based on Docker that
+Containerzied setup of [Elasticsearch](https://www.elastic.co/elasticsearch) and
+[Kibana](https://www.elastic.co/kibana) that
 
 * runs only a single node,
 * follows recommendations for a production-ready cluster, and
@@ -27,28 +27,44 @@ What then is offered in terms of being ready for production?
 
 ## Dependencies
 
-A Unix environment with [Make](https://en.wikipedia.org/wiki/Make_(software)) and
-the following installed:
+A Unix environment with [Make](https://en.wikipedia.org/wiki/Make_(software))
+(currently only tested on Fedora) and the following installed:
 
-* [Docker](https://docs.docker.com/install/)
-* [Docker Compose](https://docs.docker.com/compose/install/)
+* [Podman](https://podman.io/)
+* [Podman Compose](https://github.com/containers/podman-compose)
 
 Optional dependencies:
 
 * [jq](https://stedolan.github.io/jq/) for `make logs-*`
 * [curl](https://curl.haxx.se/) for `make health` and `make curl`
-* [awk](https://en.wikipedia.org/wiki/AWK) for `make help` and `make logs-*`
+* [awk](https://en.wikipedia.org/wiki/AWK) for `make help`
 
 ## Necessary configuration
 
 * Append the following to `/etc/sysctl.conf` (if it exists) or creating a new
   file `/etc/sysctl.d/elasticsearch.conf` to minimize swapping and increase
   number of possible mapped memory areas.
-  ```
+  ```plain
   vm.swappiness=1 # https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-configuration-memory.html
   vm.max_map_count=262144 # https://www.elastic.co/guide/en/elasticsearch/reference/current/vm-max-map-count.html#vm-max-map-count
   ```
   To apply these settings run `sudo sysctl -p` or restart your system.
+
+* Increase you system ulimits so that arbitrary much memory can be locked, at
+  least 65535 files can be opened per process, and at least 4096 processes can
+  be started per user.
+
+  To configure this on a Fedora system, append the following to
+  `/etc/security/limits.conf` and restart your machine afterwards:
+
+  ```plain
+  *               -       memlock          -1
+  *               -       nofile           65535
+  #*               -       nproc            4096
+  ```
+
+  (The last line is commented out, because by default the Fedora limit is higher
+  than 4096, which is fine.)
 
 * Open `.env` and adjust the settings to your preference.
 
@@ -172,12 +188,12 @@ Targets:
 
 * **How can I debug problems with the cluster?**
 
-  Elasticsearch and Kibana log message are available via `docker-compose logs
-  elasticsearch` and `docker-compose logs kibana`, respectively.
+  Elasticsearch and Kibana log message are available via `podman-compose logs
+  elasticsearch` and `podman-compose logs kibana`, respectively.
   For example:
 
   ```
-  elasticsearch_1  | {"type": "server", "timestamp": "2020-02-26T10:37:21,752Z", "level": "INFO", "component": "o.e.n.Node", "cluster.name": "docker-elasticstack", "node.name": "elasticsearch", "message": "node name [elasticsearch], node ID [gZ9sFqHGTyujlHoVXfDmsA], cluster name [docker-elasticstack]" }
+  {"type": "server", "timestamp": "2020-02-26T10:37:21,752Z", "level": "INFO", "component": "o.e.n.Node", "cluster.name": "docker-elasticstack", "node.name": "elasticsearch", "message": "node name [elasticsearch], node ID [gZ9sFqHGTyujlHoVXfDmsA], cluster name [docker-elasticstack]" }
   ```
 
   As these JSON message can be quite unreadable you can use the helpers
@@ -189,14 +205,10 @@ Targets:
   2020-02-26T10:37:21,752Z | INFO | node name [elasticsearch], node ID [gZ9sFqHGTyujlHoVXfDmsA], cluster name [docker-elasticstack]
   ```
 
-  However, this only works if actual JSON messages are created.
-  For example uncaught Java-exceptions will be printed in plain text to the
-  docker logs and not be visible with the above commands.
-
 ## Contributing
 
 Please feel free to submit [bug reports](https://github.com/lschmelzeisen/docker-elasticstack/issues) and [pull requests](https://github.com/lschmelzeisen/docker-elasticstack/pulls)!
 
 ## License
 
-Copyright 2019-2020 Lukas Schmelzeisen. Licensed under the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+Copyright 2019-2021 Lukas Schmelzeisen. Licensed under the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).

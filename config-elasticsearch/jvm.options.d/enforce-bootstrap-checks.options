@@ -1,0 +1,3 @@
+# Run bootstrap checks even though we are in single node mode.
+# See: https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html#_forcing_the_bootstrap_checks
+-Des.enforce.bootstrap.checks=true

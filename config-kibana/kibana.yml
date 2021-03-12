@@ -10,9 +10,9 @@ elasticsearch:
   # See: https://www.elastic.co/guide/en/kibana/current/configuring-tls.html#configuring-tls-kib-es
   ssl.certificateAuthorities: /usr/share/kibana/config/certs/ca/ca.crt
 
-  # Authentification
-  username: kibana
-  # password stored in kibana-keytore, see scripts/setup-kibana.sh
+monitoring.ui.container:
+    elasticsearch.enabled: true
+    logstash.enabled: true
 
 # Don't have data inside of $KIBANA_HOME.
 path.data: /var/data/kibana
@@ -38,9 +38,6 @@ telemetry.enabled: false
 xpack:
   # Enable monitoring of Cgroup statistics because we are using containers.
   # See: https://www.elastic.co/guide/en/kibana/current/monitoring-settings-kb.html#monitoring-ui-cgroup-settings
-  monitoring.ui.container:
-    elasticsearch.enabled: true
-    logstash.enabled: true
 
   # Enable audit logging.
   # See: https://www.elastic.co/guide/en/kibana/current/xpack-security-audit-logging.html

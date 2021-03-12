@@ -6,9 +6,11 @@ services:
       - ${STACK_DIR}/logs-elasticsearch:/var/log/elasticsearch:Z
       - ${STACK_DIR}/data-elasticsearch:/var/data/elasticsearch:Z
       - ${STACK_DIR}/certs:/usr/share/elasticsearch/config/certs:z
+      - ${STACK_DIR}/passwords:/passwords:z
+      - ./instances.yml:/instances.yml:ro,Z
+      - ./scripts/setup-elasticsearch.sh:/usr/local/bin/setup-elasticsearch.sh:ro,Z
+    entrypoint: /usr/local/bin/setup-elasticsearch.sh
     env_file: .env
-    ports:
-      - ${ELASTICSEARCH_PORT}:9200
     ulimits:
       memlock: -1 # https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-configuration-memory.html
       nofile: 65535 # https://www.elastic.co/guide/en/elasticsearch/reference/current/file-descriptors.html
@@ -16,12 +18,12 @@ services:
 
   kibana:
     image: docker.elastic.co/kibana/kibana:${TAG}
-    depends_on:
-      - elasticsearch
     volumes:
       - ${STACK_DIR}/config-kibana:/usr/share/kibana/config:Z
       - ${STACK_DIR}/data-kibana:/var/data/kibana:Z
-      - ${STACK_DIR}/certs:/usr/share/kibana/config/certs:z
+      - ${STACK_DIR}/certs:/usr/share/kibana/config/kibana:Z
+      - ${STACK_DIR}/passwords:/passwords:z
+      - ./scripts/setup-kibana.sh:/usr/local/bin/setup-kibana.sh:ro,Z
+    entrypoint: /usr/local/bin/setup-kibana.sh
     env_file: .env
-    ports:
-      - ${KIBANA_PORT}:5601
+    user: root

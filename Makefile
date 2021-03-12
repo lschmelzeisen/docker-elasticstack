@@ -15,11 +15,11 @@ help: ##- Show this help message.
 # ------------------------------------------------------------------------------
 
 start: .setup ##- Start the cluster (perform any setup if necessary).
-	docker-compose up -d
+	podman-compose up -d
 .PHONY: up
 
 stop: ##- Stop the cluster.
-	docker-compose down
+	podman-compose down
 .PHONY: down
 
 clean: stop ##- Remove all created files (this deletes all your data!).
@@ -30,15 +30,17 @@ clean: stop ##- Remove all created files (this deletes all your data!).
 
 # Sometimes, when you get Elasticsearch has problems starting, it will fail to
 # populate the logs with correct JSON-format. In those cases you can manually
-# check the complete logs via `docker-compose logs elasticsearch`.
+# check the complete logs via `podman-compose logs elasticsearch`.
+#
+# The `jq -R -r '. as $line | try fromjson catch $line'` pattern is taken from
+# https://github.com/stedolan/jq/issues/884#issuecomment-338326479
 
 logs-elasticsearch: ##- Print message of JSON-logs of Elasticsearch.
-	@docker-compose logs --no-color elasticsearch | tail -n +5 | awk 'sub("^[^\\|]* \\| ", "")' | jq -M '"\(.timestamp) | \(.level) | \(.message)"' | awk 'gsub("\"", "")'
+	@podman-compose logs elasticsearch | jq -R -r '. as $$line | try (fromjson | "\(.timestamp) | \(.level) | \(.message)") catch $$line'
 .PHONY: logs-elasticsearch
-#@docker-compose logs --no-color elasticsearch | tail -n +5 | awk 'sub("^[^\\|]* \\| ", "")' | jq -M ".timestamp + \" | \" + .level + \" | \" + .message" | awk 'gsub("\"", "")'
 
 logs-kibana: ##- Print message of JSON-logs of Kibana.
-	@docker-compose logs --no-color kibana | tail -n +1 | awk 'sub("^[^\\|]* \\| ", "")' | jq -M '"\(.["@timestamp"]) | \((.tags[0] // "NULL") | ascii_upcase) | \(.message)"' | awk 'gsub("\"", "")'
+	@podman-compose logs kibana | jq -R -r '. as $$line | try (fromjson | "\(.["@timestamp"]) | \((.tags[0] // "null") | ascii_upcase) | \(.message)") catch $$line'
 .PHONY: logs-kibana
 
 # ------------------------------------------------------------------------------
@@ -68,14 +70,15 @@ curl: ##- Send TLS-encrypted curl-requests cluster.
 	mkdir -p ${STACK_DIR}/config-kibana ${STACK_DIR}/data-kibana
 	cp -r ./config-kibana/* ${STACK_DIR}/config-kibana
 	make setup-elasticsearch setup-kibana
+	podman-compose -f docker-compose.setup.yml down
 	touch .setup
 
 setup-elasticsearch:
-	docker-compose -f docker-compose.helpers.yml run --rm setup-elasticsearch
+	podman-compose -f docker-compose.setup.yml run --rm elasticsearch
 .PHONY: setup-elasticsearch
 
 setup-kibana:
-	docker-compose -f docker-compose.helpers.yml run --rm setup-kibana
+	podman-compose -f docker-compose.setup.yml run --rm kibana
 .PHONY: setup-kibana
 
 # ------------------------------------------------------------------------------
@@ -87,11 +90,11 @@ config: config-elasticsearch config-kibana
 .PHONY: config
 
 config-elasticsearch:
-	docker create --name ${PROJECT_NAME}_elasticsearch-config docker.elastic.co/elasticsearch/elasticsearch:${TAG}
-	docker cp ${PROJECT_NAME}_elasticsearch-config:/usr/share/elasticsearch/config ./config-elasticsearch
-	docker rm -f ${PROJECT_NAME}_elasticsearch-config
+	podman create --name ${PROJECT_NAME}_elasticsearch-config docker.elastic.co/elasticsearch/elasticsearch:${TAG}
+	podman cp ${PROJECT_NAME}_elasticsearch-config:/usr/share/elasticsearch/config ./config-elasticsearch
+	podman rm -f ${PROJECT_NAME}_elasticsearch-config
 
 config-kibana:
-	docker create --name ${PROJECT_NAME}_kibana-config docker.elastic.co/kibana/kibana:${TAG}
-	docker cp ${PROJECT_NAME}_kibana-config:/usr/share/kibana/config/. ./config-kibana
-	docker rm -f ${PROJECT_NAME}_kibana-config
+	podman create --name ${PROJECT_NAME}_kibana-config docker.elastic.co/kibana/kibana:${TAG}
+	podman cp ${PROJECT_NAME}_kibana-config:/usr/share/kibana/config/. ./config-kibana
+	podman rm -f ${PROJECT_NAME}_kibana-config
