@@ -9,6 +9,7 @@ services:
     env_file: .env
     ports:
       - ${ELASTICSEARCH_PORT}:9200
+    restart: on-failure
     ulimits:
       memlock: -1 # https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-configuration-memory.html
       nofile: 65535 # https://www.elastic.co/guide/en/elasticsearch/reference/current/file-descriptors.html
@@ -25,3 +26,4 @@ services:
     env_file: .env
     ports:
       - ${KIBANA_PORT}:5601
+    restart: on-failure
