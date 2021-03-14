@@ -10,6 +10,8 @@ elasticsearch:
   # See: https://www.elastic.co/guide/en/kibana/current/configuring-tls.html#configuring-tls-kib-es
   ssl.certificateAuthorities: /usr/share/kibana/config/certs/ca/ca.crt
 
+# Enable monitoring of Cgroup statistics because we are using containers.
+# See: https://www.elastic.co/guide/en/kibana/current/monitoring-settings-kb.html#monitoring-ui-cgroup-settings
 monitoring.ui.container:
     elasticsearch.enabled: true
     logstash.enabled: true
@@ -36,9 +38,6 @@ server:
 telemetry.enabled: false
 
 xpack:
-  # Enable monitoring of Cgroup statistics because we are using containers.
-  # See: https://www.elastic.co/guide/en/kibana/current/monitoring-settings-kb.html#monitoring-ui-cgroup-settings
-
   # Enable audit logging.
   # See: https://www.elastic.co/guide/en/kibana/current/xpack-security-audit-logging.html
   security.audit.enabled: true
